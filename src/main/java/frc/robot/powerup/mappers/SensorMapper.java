@@ -11,25 +11,24 @@ import org.montclairrobotics.cyborg.devices.CBEncoder;
 import org.montclairrobotics.cyborg.devices.CBNavX;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.powerup.RobotCB;
-import frc.robot.powerup.data.RequestData;
+import static frc.robot.powerup.RobotCB.*;
 
 public class SensorMapper extends CBSensorMapper {
 
-    private RequestData rd = RobotCB.requestData; // (RequestData)Cyborg.requestData;
+    //private RequestData rd = RobotCB.requestData; // (RequestData)Cyborg.requestData;
 
     // create local copies of the devices one-time
     // for use in update method
-    private CBEncoder mainLiftEncoder = hardwareAdapter.getEncoder(RobotCB.mainLiftEncoder);
-    private CBDigitalInput mainLiftLimit = hardwareAdapter.getDigitalInput(RobotCB.mainLiftLimit);
-    private CBEncoder intakeLiftEncoder = hardwareAdapter.getEncoder(RobotCB.intakeLiftEncoder);
-    private CBEncoder drivetrainLeftEncoder = hardwareAdapter.getEncoder(RobotCB.dtLeftEncoder);
-    private CBEncoder drivetrainRightEncoder = hardwareAdapter.getEncoder(RobotCB.dtRightEncoder);
+    private CBEncoder mainLiftEncoder = hardwareAdapter.getEncoder(mainLiftEncoderId);
+    private CBDigitalInput mainLiftLimit = hardwareAdapter.getDigitalInput(mainLiftLimitId);
+    private CBEncoder intakeLiftEncoder = hardwareAdapter.getEncoder(intakeLiftEncoderId);
+    private CBEncoder drivetrainLeftEncoder = hardwareAdapter.getEncoder(dtLeftEncoderId);
+    private CBEncoder drivetrainRightEncoder = hardwareAdapter.getEncoder(dtRightEncoderId);
     @SuppressWarnings("unchecked")
-    private CBDashboardChooser<Character> fieldPosition = (CBDashboardChooser<Character>)hardwareAdapter.getDevice(RobotCB.fieldPosition);
+    private CBDashboardChooser<Character> fieldPosition = (CBDashboardChooser<Character>)hardwareAdapter.getDevice(fieldPositionId);
     @SuppressWarnings("unchecked")
-    private CBDashboardChooser<String> autoSelection = (CBDashboardChooser<String>)hardwareAdapter.getDevice(RobotCB.autoSelection);
-    private CBNavX navx = hardwareAdapter.getNavX(RobotCB.navx);
+    private CBDashboardChooser<String> autoSelection = (CBDashboardChooser<String>)hardwareAdapter.getDevice(autoSelectionId);
+    private CBNavX navx = hardwareAdapter.getNavX(navxId);
     private CBTimingController dashboardTimer= new CBTimingController().setTiming(CBGameMode.anyPeriodic, 10);
 
     public SensorMapper(Cyborg robot) {
@@ -46,29 +45,29 @@ public class SensorMapper extends CBSensorMapper {
         
         // The main work is done here transferring values from 
         // the devices to RequestData
-        rd.mainLiftEncoderValue = mainLiftEncoder.getDistance();
-        rd.mainLiftLimitValue = mainLiftLimit.get();
-        rd.drivetrainLeftEncoderValue = drivetrainLeftEncoder.getDistance();
-        rd.drivetrainRightEncoderValue = drivetrainRightEncoder.getDistance();
-        rd.drivetrainAverageEncoderValue = (rd.drivetrainLeftEncoderValue+rd.drivetrainRightEncoderValue)/2.0;
-        rd.robotAngle = navx.getYaw();
+        requestData.mainLiftEncoderValue = mainLiftEncoder.getDistance();
+        requestData.mainLiftLimitValue = mainLiftLimit.get();
+        requestData.drivetrainLeftEncoderValue = drivetrainLeftEncoder.getDistance();
+        requestData.drivetrainRightEncoderValue = drivetrainRightEncoder.getDistance();
+        requestData.drivetrainAverageEncoderValue = (requestData.drivetrainLeftEncoderValue+requestData.drivetrainRightEncoderValue)/2.0;
+        requestData.robotAngle = navx.getYaw();
 
         // FMS Data, Driver Station (Just to make things interesting lets try this pre-game only)
         if (Cyborg.isGameMode(CBGameMode.preGame)) {
-            rd.gameSpecificMessage = DriverStation.getInstance().getGameSpecificMessage();
-            rd.fieldPosition = fieldPosition.getSelected();
-            rd.autoSelection = autoSelection.getSelected();
-            rd.nearSwitchSide = rd.gameSpecificMessage.charAt(0);
+            requestData.gameSpecificMessage = DriverStation.getInstance().getGameSpecificMessage();
+            requestData.fieldPosition = fieldPosition.getSelected();
+            requestData.autoSelection = autoSelection.getSelected();
+            requestData.nearSwitchSide = requestData.gameSpecificMessage.charAt(0);
         }
 
         if(dashboardTimer.update().getState()) {
-            SmartDashboard.putBoolean("mainLiftLimit", rd.mainLiftLimitValue);
-            SmartDashboard.putNumber("mainLiftEncoder", rd.mainLiftEncoderValue);
+            SmartDashboard.putBoolean("mainLiftLimit", requestData.mainLiftLimitValue);
+            SmartDashboard.putNumber("mainLiftEncoder", requestData.mainLiftEncoderValue);
             SmartDashboard.putNumber("intakeLiftEncoder", intakeLiftEncoder.getDistance());
-            SmartDashboard.putNumber("drivetrainLeftEncoder", rd.drivetrainLeftEncoderValue);
-            SmartDashboard.putNumber("drivetrainRightEncoder", rd.drivetrainRightEncoderValue);
-            SmartDashboard.putString("AutoSelectedEcho", rd.autoSelection);
-            SmartDashboard.putNumber("FieldPositionEcho", rd.fieldPosition);
+            SmartDashboard.putNumber("drivetrainLeftEncoder", requestData.drivetrainLeftEncoderValue);
+            SmartDashboard.putNumber("drivetrainRightEncoder", requestData.drivetrainRightEncoderValue);
+            SmartDashboard.putString("AutoSelectedEcho", requestData.autoSelection);
+            SmartDashboard.putNumber("FieldPositionEcho", requestData.fieldPosition);
         }
     }
 }
